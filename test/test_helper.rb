@@ -11,5 +11,16 @@ module ActiveSupport
     fixtures :all
 
     # Add more helper methods to be used by all tests here...
+    def sign_in(user)
+      post session_url, params: { email_address: user.email_address, password: "password" }
+    end
+
+    def login_as(user)
+      session = user.sessions.create!
+      Current.session = session
+      request = ActionDispatch::Request.new(Rails.application.env_config)
+      cookies = request.cookie_jar
+      cookies.signed[:session_id] = {value: session.id, httponly: true, same_site: :lax}
+    end
   end
 end
